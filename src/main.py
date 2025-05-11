@@ -1,15 +1,15 @@
-# import os
+from pathlib import Path
 from datetime import date
-from diary import Student, Session
+from diary import Diary, Session
+
 
 # from pyfiglet import Figlet
 
-# PROFILES_PATH = "./content/profiles"
-# STUDENT_PATH = os.path.join(PROFILES_PATH, f"{student.name}")
-
-#!TODO: update and get should be methods of Student
+profile_path = Path("../content/profiles/")
+#!TODO:
+# get and update are methods of Diary
 # The hello message should be encapsulated as hello
-# Sessions should create a new folder per student, each folder should contain: profile + class_entries
+# Diary should create a new folder per student, each folder should contain: profile + class_entries
 # Next up, would be getting the Calendar working
 
 
@@ -20,10 +20,13 @@ def main():
     print(f"Today's date: {today}")
 
     name = input("Who's taking the class: ").title()
-    lesson = input("What's the lesson: ").title()
-    student = Student(name, 1)
+    lesson = input("Which lesson: ").title()
+    diary = Diary(profile_path)
 
-    print(f"Starting session with {student.name}, lesson {lesson}")
+    student = diary.get_or_create_student(name)
+
+    print(f"Starting session with: {student.name}")
+    print(f"With a lesson about: {lesson}")
 
     session = Session(student, today)
 
