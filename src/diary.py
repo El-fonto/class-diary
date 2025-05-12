@@ -48,9 +48,14 @@ class Diary:
         #!TODO:
         ## encapsulate get_or_create_student and add_notes in one
 
+    def close(self):
+        self.update_profile()
+        self.internal_data["notes"].display_summary()
+        self.save_to_file()
+
     def get_or_create_student(self, name: str) -> Student:
         student_path = os.path.join(self.path, name)
-        filename = f"00-{name}_profile.json"
+        filename = f"00_{name}_profile.json"
         student_profile = os.path.join(student_path, filename)
 
         # there's a folder
@@ -116,10 +121,11 @@ class Diary:
 
         export_notes = []
 
-        for entry in self.internal_data["notes"].entries:
-            timestamp, note = entry
-            timestamp = str(timestamp.strftime("%H:%M:%S"))
-            export_notes.append(f"{timestamp}: {note}")
+        i = 1
+        for timestamp, entry in self.internal_data["notes"].entries:
+            formatted_timestamp = str(timestamp.strftime("%H:%M:%S"))
+            export_notes.append(f"{formatted_timestamp} #[{i}]: {entry}")
+            i += 1
 
         self.export_data["notes"] = export_notes
 

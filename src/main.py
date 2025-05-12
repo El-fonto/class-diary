@@ -18,7 +18,7 @@ def main():
     # print(f.renderText("Class Diary"))
     print(f"Today's date: {today}")
 
-    name = input("Who's taking the class: ").title()
+    name = input("Who's taking the class: ").strip().title()
     lesson = input("Which lesson: ").title()
     diary = Diary(profile_path)
 
@@ -35,10 +35,7 @@ def main():
         notes.add_entry(entry)
         print(f"Saved entry at {notes.entries[-1][0].strftime("%H:%M:%S")}")
 
-    diary.update_profile()
-
-    notes.display_summary()
-    diary.save_to_file()
+    diary.close()
 
 
 if __name__ == "__main__":
