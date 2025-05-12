@@ -1,11 +1,10 @@
-from pathlib import Path
 from datetime import date
 from diary import Diary, Session
 
 
 # from pyfiglet import Figlet
 
-profile_path = Path("../content/profiles/")
+profile_path = "./content/profiles/"
 #!TODO:
 # get and update are methods of Diary
 # The hello message should be encapsulated as hello
@@ -35,7 +34,9 @@ def main():
         if entry.lower() == "done":
             break
         session.add_entry(entry)
-        print(f"Saved entry at {session.entries[-1][0]}")
+        print(f"Saved entry at {session.entries[-1][0].strftime("%H:%M:%S")}")
+
+    diary.update_profile()
 
     session.display_summary()
 

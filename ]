@@ -29,13 +29,13 @@ class Session:
 
         print("\nClass Summary:")
         print(f"Date: {self.session_date}")
-        print(f"Lesson #: {self.student.lesson_count}")
         print(f"Student: {self.student.name}")
+        print(f"ID: {self.student.id}")
 
         i = 1
         for timestamp, entry in self.entries:
             formatted_timestamp = timestamp.strftime("%H:%M:%S")
-            print(f"🕑️{formatted_timestamp} #[{i}]: {entry}")
+            print(f"🕑️{formatted_timestamp} #[{i}]: {entry} at ")
             i += 1
 
 
@@ -45,29 +45,31 @@ class Diary:
         self.session_data = {}
 
     def get_or_create_student(self, name: str) -> Student:
-        student_path = os.path.join(self.path, name)
         filename = f"{name}_profile.json"
+        student_path = os.path.join(self.path, name)
         student_profile = os.path.join(student_path, filename)
 
         # there's a folder
-        if os.path.exists(student_path) and os.path.isfile(student_profile):
-            with open(student_profile, "r") as f:
-                loaded_profile = json.load(f)
+        if os.path.exists(student_path):
+            # check profile
 
-            new_student = Student(name)
-            new_student.id = loaded_profile.get("id", "Unknown")
-            new_student.lesson_count = loaded_profile.get("lesson_count")
+            if os.path.isfile(student_profile):
+                with open(student_profile, "r") as f:
+                    loaded_profile = json.load(f)
 
-            self.session_data = {
-                "name": new_student.name,
-                "id": new_student.id,
-                "lesson_count": new_student.lesson_count,
-            }
+                student = Student(name)
+                student.id = loaded_profile.get("id", "Unknown")
+                student.lesson_count = loaded_profile.get("lesson_count", 1)
 
-            return new_student
+                print(f"#{student.name} was found! ID:{student.id}")
+
+                return student
 
         # no profile -> create one
-        print("No existing profile found. Creating one...")
+        print(
+            f"#No existing profile found at {student_path} Creating a new profile for: {name}"
+        )
+
         os.makedirs(student_path, exist_ok=True)
 
         new_student = Student(name)
@@ -80,22 +82,9 @@ class Diary:
         with open(student_profile, "w") as f:
             json.dump(self.session_data, f, indent=2, sort_keys=True)
 
-        print(f"\n{new_student.name}'s profile created -> {student_profile}\n")
-
-        print(f"data saved: {self.session_data} \n {self.session_data["name"]}")
+        print(f"#Profile for [[{new_student.name}]] created -> {student_profile}")
 
         return new_student
-
-    def update_profile(self):
-        filename = f"{self.session_data["name"]}_profile.json"
-        profile_path = os.path.join(self.path, self.session_data["name"], filename)
-        self.session_data["lesson_count"] += 1
-
-        #!TODO:
-        ## add session entries to session_data and add this to the profile with a good syntax in the json
-
-        with open(profile_path, "w") as f:
-            json.dump(self.session_data, f, indent=2, sort_keys=True)
 
     """
     def save_to_file(self, dest_path, session):
