@@ -29,7 +29,7 @@ def main():
     print(f"With a lesson about: {lesson}")
 
     while True:
-        entry = input("=====> jot down smthg: (or 'done'): ").strip()
+        entry = input("=====> jot down (or 'done'): ").strip()
         if entry.lower() == "done":
             break
         notes.add_entry(entry)
@@ -38,6 +38,7 @@ def main():
     diary.update_profile()
 
     notes.display_summary()
+    diary.save_to_file()
 
 
 if __name__ == "__main__":

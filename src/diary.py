@@ -45,9 +45,12 @@ class Diary:
         self.internal_data = {}
         self.export_data = {}
 
+        #!TODO:
+        ## encapsulate get_or_create_student and add_notes in one
+
     def get_or_create_student(self, name: str) -> Student:
         student_path = os.path.join(self.path, name)
-        filename = f"{name}_profile.json"
+        filename = f"00-{name}_profile.json"
         student_profile = os.path.join(student_path, filename)
 
         # there's a folder
@@ -59,16 +62,18 @@ class Diary:
             new_student.id = loaded_profile.get("id", "Unknown")
             new_student.lesson_count = loaded_profile.get("lesson_count")
 
-            # store in internal dict to use later
+            # store strings to write files later
             self.export_data = {
-                "student_name": new_student.name,
                 "id": new_student.id,
+                "student_name": new_student.name,
                 "lesson_count": new_student.lesson_count,
             }
 
+            # store path and Student to use later
             self.internal_data = {
                 "student": new_student,
                 "student_profile": student_profile,
+                "student_path": student_path,
             }
 
             return new_student
@@ -78,15 +83,18 @@ class Diary:
         os.makedirs(student_path, exist_ok=True)
 
         new_student = Student(name)
+        # store strings to write files later
         self.export_data = {
-            "student_name": new_student.name,
             "id": new_student.id,
+            "student_name": new_student.name,
             "lesson_count": new_student.lesson_count,
         }
 
+        # store path and Student to use later
         self.internal_data = {
             "student": new_student,
             "student_profile": student_profile,
+            "student_path": student_path,
         }
 
         with open(student_profile, "w") as f:
@@ -98,46 +106,35 @@ class Diary:
 
     def add_notes(self) -> SessionNotes:
         notes = SessionNotes(self.internal_data["student"])
+        self.internal_data["notes"] = notes
 
-        self.internal_data["date"] = notes.session_date
-        return notes
+        return self.internal_data["notes"]
 
     def update_profile(self):
-        filename = f"{self.export_data["student_name"]}_profile.json"
-        profile_path = os.path.join(
-            self.path, self.export_data["student_name"], filename
-        )
+        student_profile = self.internal_data["student_profile"]
         self.export_data["lesson_count"] += 1
 
-        #!TODO:
-        ## add session entries to session_data and add this to the profile with a good syntax in the json
+        export_notes = []
 
-        with open(profile_path, "w") as f:
-            json.dump(self.export_data, f, indent=2, sort_keys=True)
+        for entry in self.internal_data["notes"].entries:
+            timestamp, note = entry
+            timestamp = str(timestamp.strftime("%H:%M:%S"))
+            export_notes.append(f"{timestamp}: {note}")
+
+        self.export_data["notes"] = export_notes
+
+        #!TODO:
+        ## encapsulate update and save_to_file into one
+
+        with open(student_profile, "w") as f:
+            json.dump(self.export_data, f, indent=2)
 
     def save_to_file(self):
         student_name = self.internal_data["student"].name
-        session_date = self.internal_data["date"].isoformat()
+        session_date = self.internal_data["notes"].session_date.isoformat()
 
-        filename = f"{session_date}_{student_name}.json"
-
-        """
-        # if not os.path.exists(self.path):
-            os.makedirs(self.path)
-
-        self.session_data["student"] = 
-        session_data = {
-            "student": .name,
-            "session_date": self.session_date.isoformat(),
-            "entries": self.entries,
-            "timestamps": self.timestamps,
-        }
-
-        filename = f"{self.session_date.isoformat()}_{self.name}.json"
-        filepath = os.path.join(dest_path, filename)
+        note_file = f"{session_date}_{student_name}.json"
+        filename = os.path.join(self.internal_data["student_path"], note_file)
 
         with open(filename, "w") as f:
-            json.dump(session_data, f, indent=4)
-
-        return filepath
-"""
+            json.dump(self.export_data, f, indent=4)
