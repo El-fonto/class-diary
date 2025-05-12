@@ -1,6 +1,6 @@
 import unittest
 from datetime import date, datetime
-from diary import Student, Session
+from diary import Student, SessionNotes
 
 
 class TestStudentClass(unittest.TestCase):

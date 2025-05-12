@@ -1,5 +1,5 @@
 from datetime import date
-from diary import Diary, Session
+from diary import Diary
 
 
 # from pyfiglet import Figlet
@@ -23,22 +23,21 @@ def main():
     diary = Diary(profile_path)
 
     student = diary.get_or_create_student(name)
+    notes = diary.add_notes()
 
     print(f"Starting session with: {student.name}")
     print(f"With a lesson about: {lesson}")
 
-    session = Session(student, today)
-
     while True:
-        entry = input("=====> data: (or 'done'): ").strip()
+        entry = input("=====> jot down smthg: (or 'done'): ").strip()
         if entry.lower() == "done":
             break
-        session.add_entry(entry)
-        print(f"Saved entry at {session.entries[-1][0].strftime("%H:%M:%S")}")
+        notes.add_entry(entry)
+        print(f"Saved entry at {notes.entries[-1][0].strftime("%H:%M:%S")}")
 
     diary.update_profile()
 
-    session.display_summary()
+    notes.display_summary()
 
 
 if __name__ == "__main__":

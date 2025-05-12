@@ -12,7 +12,7 @@ class Student:
         self.lesson_count = 1
 
 
-class Session:
+class SessionNotes:
     def __init__(self, student: Student, session_date: date | None = None) -> None:
         self.student = student
         self.session_date = session_date or date.today()
@@ -42,7 +42,8 @@ class Session:
 class Diary:
     def __init__(self, path) -> None:
         self.path = path
-        self.session_data = {}
+        self.internal_data = {}
+        self.export_data = {}
 
     def get_or_create_student(self, name: str) -> Student:
         student_path = os.path.join(self.path, name)
@@ -54,14 +55,20 @@ class Diary:
             with open(student_profile, "r") as f:
                 loaded_profile = json.load(f)
 
-            new_student = Student(name)
+            new_student = Student(loaded_profile.get("student_name", name))
             new_student.id = loaded_profile.get("id", "Unknown")
             new_student.lesson_count = loaded_profile.get("lesson_count")
 
-            self.session_data = {
-                "name": new_student.name,
+            # store in internal dict to use later
+            self.export_data = {
+                "student_name": new_student.name,
                 "id": new_student.id,
                 "lesson_count": new_student.lesson_count,
+            }
+
+            self.internal_data = {
+                "student": new_student,
+                "student_profile": student_profile,
             }
 
             return new_student
@@ -71,36 +78,52 @@ class Diary:
         os.makedirs(student_path, exist_ok=True)
 
         new_student = Student(name)
-        self.session_data = {
-            "name": new_student.name,
+        self.export_data = {
+            "student_name": new_student.name,
             "id": new_student.id,
             "lesson_count": new_student.lesson_count,
         }
 
+        self.internal_data = {
+            "student": new_student,
+            "student_profile": student_profile,
+        }
+
         with open(student_profile, "w") as f:
-            json.dump(self.session_data, f, indent=2, sort_keys=True)
+            json.dump(self.export_data, f, indent=2, sort_keys=True)
 
         print(f"\n{new_student.name}'s profile created -> {student_profile}\n")
 
-        print(f"data saved: {self.session_data} \n {self.session_data["name"]}")
-
         return new_student
 
+    def add_notes(self) -> SessionNotes:
+        notes = SessionNotes(self.internal_data["student"])
+
+        self.internal_data["date"] = notes.session_date
+        return notes
+
     def update_profile(self):
-        filename = f"{self.session_data["name"]}_profile.json"
-        profile_path = os.path.join(self.path, self.session_data["name"], filename)
-        self.session_data["lesson_count"] += 1
+        filename = f"{self.export_data["student_name"]}_profile.json"
+        profile_path = os.path.join(
+            self.path, self.export_data["student_name"], filename
+        )
+        self.export_data["lesson_count"] += 1
 
         #!TODO:
         ## add session entries to session_data and add this to the profile with a good syntax in the json
 
         with open(profile_path, "w") as f:
-            json.dump(self.session_data, f, indent=2, sort_keys=True)
+            json.dump(self.export_data, f, indent=2, sort_keys=True)
 
-    """
-    def save_to_file(self, dest_path, session):
-        if not os.path.exists(dest_path):
-            os.makedirs(dest_path)
+    def save_to_file(self):
+        student_name = self.internal_data["student"].name
+        session_date = self.internal_data["date"].isoformat()
+
+        filename = f"{session_date}_{student_name}.json"
+
+        """
+        # if not os.path.exists(self.path):
+            os.makedirs(self.path)
 
         self.session_data["student"] = 
         session_data = {
