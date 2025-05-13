@@ -1,11 +1,14 @@
 import unittest
-from datetime import date, datetime
-from diary import Student, SessionNotes
+from diary import Student
 
 
 class TestStudentClass(unittest.TestCase):
     def test_student_creation(self):
-        s1 = Student("Alice", 1)
-        s2 = Student("alice", 2)
+        s1 = Student("Alice")
+        s2 = Student("Alice")
 
-        self.assertNotEqual(s1, s2)
+        self.assertEqual(s1.name, s2.name)
+        self.assertNotEqual(s1.id, s2.id)
+
+    def test_json_creation(self):
+        pass

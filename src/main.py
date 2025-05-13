@@ -1,32 +1,20 @@
-from datetime import date
 from diary import Diary
+# from report import create_class_report_pdf
 
-
-# from pyfiglet import Figlet
 
 profile_path = "./content/profiles/"
 #!TODO:
-# get and update are methods of Diary
-# The hello message should be encapsulated as hello
-# Diary should create a new folder per student, each folder should contain: profile + class_entries
 # Next up, would be getting the Calendar working
 
 
 def main():
-    today = date.today()
-    # f = Figlet(font="slant")
-    # print(f.renderText("Class Diary"))
-    print(f"Today's date: {today}")
+    diary = Diary(profile_path)
 
     name = input("Who's taking the class: ").strip().title()
     lesson = input("Which lesson: ").title()
-    diary = Diary(profile_path)
 
-    student = diary.get_or_create_student(name)
-    notes = diary.add_notes()
-
-    print(f"Starting session with: {student.name}")
-    print(f"With a lesson about: {lesson}")
+    diary.get_or_create_profile(name)
+    notes = diary.add_notes(lesson)
 
     while True:
         entry = input("=====> jot down (or 'done'): ").strip()
@@ -36,6 +24,7 @@ def main():
         print(f"Saved entry at {notes.entries[-1][0].strftime("%H:%M:%S")}")
 
     diary.close()
+    # create_class_report_pdf(diary.data["student_profile"], diary.data["student_path"])
 
 
 if __name__ == "__main__":
