@@ -1,8 +1,8 @@
 from diary import Diary
-# from report import create_class_report_pdf
+from report import create_class_report_pdf
 
 
-profile_path = "./content/profiles/"
+profile_path = "./content/tests/"
 #!TODO:
 # Next up, would be getting the Calendar working
 
@@ -23,8 +23,8 @@ def main():
         notes.add_entry(entry)
         print(f"Saved entry at {notes.entries[-1][0].strftime("%H:%M:%S")}")
 
-    diary.close()
-    # create_class_report_pdf(diary.data["student_profile"], diary.data["student_path"])
+    note_json_path = diary.close()
+    create_class_report_pdf(note_json_path, diary.data["student_path"])
 
 
 if __name__ == "__main__":

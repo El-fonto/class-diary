@@ -31,17 +31,35 @@ class SessionNotes:
             print("No entries this session")
             return
 
-        print("\nClass Summary:")
+        print("=== Class Summary ===")
         print(f"Date: {self.session_date} - Student: {self.student.name}")
         print(
             f"Lesson #: {self.student.lesson_count} - {self.lesson_title} with #{len(self.entries)} notes:"
         )
+        print()
 
         i = 1
         for timestamp, entry in self.entries:
             formatted_timestamp = timestamp.strftime("%H:%M:%S")
             print(f"🕑️{formatted_timestamp} #[{i}]: {entry}")
             i += 1
+
+    def to_dict(self) -> dict:
+        entries = []
+        for timestamp, entry in self.entries:
+            formatted_timestamp = timestamp.strftime("%H:%M:%S")
+            entries.append(f"[{formatted_timestamp}]: {entry}")
+
+        session_notes_dict = {
+            "iso_date": str(self.session_date.isoformat()),
+            "lesson_title": self.lesson_title,
+            "lesson_count": self.student.lesson_count,
+            "student_name": self.student.name,
+            "session_date": str(self.session_date.strftime("%A %d %B %Y")),
+            "entries": entries,
+        }
+
+        return session_notes_dict
 
 
 class Diary:
@@ -56,10 +74,18 @@ class Diary:
         # print(f.renderText("Class Diary"))
         print(f"Today's date: {today}")
 
-    def close(self):
+    def close(self) -> str:
+        os.system("clear")
         self.update_profile()
+        print(f"=======> {self.data["to_export"]["student_name"]}'s profile updated.")
+
         self.data["notes"].display_summary()
-        self.save_to_file()
+
+        note_file = self.save_to_file()
+        print(
+            f"#{len(self.data["notes"].entries)} notes saved -> {self.data["student_path"]}"
+        )
+        return note_file
 
     def add_notes(self, lesson_title: str) -> SessionNotes:
         notes = SessionNotes(self.data["student"], lesson_title)
@@ -69,7 +95,7 @@ class Diary:
 
     def get_or_create_profile(self, name: str) -> Student:
         student_path = os.path.join(self.path, name)
-        filename = f"00_{name}_profile.json"
+        filename = f"0-{name}_profile.json"
         student_profile = os.path.join(student_path, filename)
 
         # there's a folder
@@ -126,16 +152,11 @@ class Diary:
         student_profile = self.data["student_profile"]
         self.data["to_export"]["lesson_count"] += 1
 
-        title = self.data["notes"].lesson_title
-        formatted_date = str(self.data["notes"].session_date.strftime("%A %d %B %Y"))
+        notes_dict = self.data["notes"].to_dict()
+        formatted_date = notes_dict["session_date"]
+        title = notes_dict["lesson_title"]
 
         export_notes = [f"{formatted_date}-{title}"]
-
-        i = 1
-        for timestamp, entry in self.data["notes"].entries:
-            formatted_timestamp = str(timestamp.strftime("%H:%M:%S"))
-            export_notes.append(f"{formatted_timestamp} #[{i}]: {entry}")
-            i += 1
 
         if "lesson_notes" in self.data["to_export"]:
             self.data["to_export"]["lesson_notes"].append(export_notes)
@@ -145,12 +166,16 @@ class Diary:
         with open(student_profile, "w") as f:
             json.dump(self.data["to_export"], f, indent=2)
 
-    def save_to_file(self):
-        student_name = self.data["student"].name
+    def save_to_file(self) -> str:
+        notes_dict = self.data["notes"].to_dict()
+
+        student_name = notes_dict["student_name"]
         session_date = self.data["notes"].session_date.isoformat()
 
         note_file = f"{session_date}_{student_name}.json"
         filename = os.path.join(self.data["student_path"], note_file)
 
         with open(filename, "w") as f:
-            json.dump(self.data["to_export"], f, indent=2)
+            json.dump(notes_dict, f, indent=2)
+
+        return filename
