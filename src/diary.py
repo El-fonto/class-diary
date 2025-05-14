@@ -141,8 +141,10 @@ class Diary:
             },
         }
 
-        with open(student_profile, "w") as f:
-            json.dump(self.data["to_export"], f, indent=2, sort_keys=True)
+        with open(student_profile, "w", encoding="utf8") as f:
+            json.dump(
+                self.data["to_export"], f, indent=2, sort_keys=True, ensure_ascii=False
+            )
 
         print(f"{new_student.name}'s profile created -> {student_profile}\n")
 
@@ -164,7 +166,7 @@ class Diary:
             self.data["to_export"]["lesson_notes"] = export_notes
 
         with open(student_profile, "w") as f:
-            json.dump(self.data["to_export"], f, indent=2)
+            json.dump(self.data["to_export"], f, indent=2, ensure_ascii=False)
 
     def save_to_file(self) -> str:
         notes_dict = self.data["notes"].to_dict()
@@ -175,7 +177,7 @@ class Diary:
         note_file = f"{session_date}_{student_name}.json"
         filename = os.path.join(self.data["student_path"], note_file)
 
-        with open(filename, "w") as f:
-            json.dump(notes_dict, f, indent=2)
+        with open(filename, "w", encoding="utf8") as f:
+            json.dump(notes_dict, f, indent=2, ensure_ascii=False)
 
         return filename
