@@ -2,6 +2,7 @@ import os
 import json
 import uuid
 import datetime
+from rich import print
 from datetime import date
 # from pyfiglet import Figlet
 
@@ -27,6 +28,9 @@ class SessionNotes:
         self.entries.append((timestamp, entry))
 
     def display_summary(self):
+        #!TODO:
+        # create table style for summary with typer
+
         if not self.entries:
             print("No entries this session")
             return

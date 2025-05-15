@@ -4,8 +4,8 @@ from fpdf import FPDF
 
 
 class PDF(FPDF):
-    def note_title(self, date, lesson_number, name):
-        title = f"Lesson #{lesson_number} "
+    def note_title(self, date, lesson_number, lesson_title, name):
+        title = f"Lesson #{lesson_number} - {lesson_title}"
         title2 = f"{date} - {name}"
 
         self.set_font("Times", "B", 14)
@@ -49,10 +49,11 @@ def create_class_report_pdf(json_path: str, pdf_path: str):
 
     note_body = "\n".join(entries)
 
-    pdf.note_title(session_date, lesson_count, student_name)
+    pdf.note_title(session_date, lesson_count, lesson_title, student_name)
     pdf.note_body(note_body)
 
     report_name = f"{iso_date}_{lesson_title}_{student_name}_{lesson_count}.pdf"
     report_path = os.path.join(pdf_path, report_name)
 
     pdf.output(report_path, "F")
+    return report_path
